@@ -13,3 +13,7 @@ A demo version of merlin with mandarin fronted to make a simple tte system.
 + remove all shell scipt
 + extract necessary code for a demo tts system
 + Use python wrapper for all tools include HTS,WORLD,FESTIVAL,SPTK
+
+## code from
+
+This repo copy lots of code from [JackieXiao MTTS](https://github.com/Jackiexiao/MTTS) and [Merlin](https://github.com/CSTR-Edinburgh/merlin)
