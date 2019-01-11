@@ -2,14 +2,13 @@ import os
 import re
 import logging
 from pypinyin import pinyin, Style, load_phrases_dict
-import textgrid as tg
-from mandarin_frontend import txt2label
+from fronted.mandarin import textgrid as tg
+from fronted.mandarin.mandarin_frontend import txt2label
 
 consonant = [
     'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'zh',
     'ch', 'sh', 'r', 'z', 'c', 's', 'y', 'w'
 ]
-
 
 def _pre_pinyin_setting():
     ''' fix pinyin error'''
