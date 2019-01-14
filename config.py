@@ -4,6 +4,12 @@ import configparser
 cf = configparser.ConfigParser()
 pwd = os.getcwd()
 cf.read(os.path.join(pwd,'./resource/cfgs','cfg.config'))
+#
+add_frame_features = ""
+inp_dim = 425
+out_dim = 187
+inp_norm = "MINMAX"
+out_norm = "MINMAX"
 
 ### acoustic feature define
 inter_data_dir = cf.get("acoustic","inter_data_dir")
@@ -12,8 +18,8 @@ lab_dim = cf.getint("acoustic","lab_dim")
 label_style = cf.get("acoustic","label_style")
 
 binary_label_dir = os.path.join(inter_data_dir,'binary_label_' + str(dimension))
-nn_label_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_' + suffix)
-nn_label_norm_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_norm_' + suffix)
+nn_label_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_')
+nn_label_norm_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_norm_')
 label_norm_file = 'label_norm_%s_%d.dat' % (label_style, lab_dim)
 label_norm_file = os.path.join(inter_data_dir, label_norm_file)
 
@@ -25,7 +31,12 @@ inter_data_dir = os.path.join("./data/path","inter_data")
 def_inp_dir = os.path.join("./data/path","inp_feat")
 def_out_dir = os.path.join("./data/path","out_feat")
 model_dir = os.path.join("./data/path","models")
+tf_model_dir =os.path.join("./data/path","models","tensorflow")
+
 stats_dir = os.path.join("./data/path","stats")
+inp_stats_file = os.path.join(stats_dir, "input_%d_%s_%d.norm" %(inp_norm, inp_dim))
+out_stats_file = os.path.join(stats_dir, "output_%d_%s_%d.norm" %(out_norm, out_dim))
+
 gen_dir = os.path.join("./data/path","gen")
 pred_feat_dir = os.path.join("./data/path","pred_feat")
 ## feature directory
@@ -54,12 +65,15 @@ glottdnn_in_slsf_dir= os.path.join(glott_dnn_path,"slsf")
 #
 in_pdd_dir = os.path.join("./data", 'pdd')
 
+add_frame_features = cf.getboolean("magphase_vocoder","add_frame_features")
+subphone_feats = cf.get("labels","subphone_feats")
+in_label_align_dir = cf.get("labels","in_label_align_dir")
+additional_features = cf.get("labels","additional_features")
+silence_pattern = cf.get("labels","silence_pattern")
+label_style = cf.get("labels","label_style")
+label_type = cf.get("labels","label_type")
+#
+file_id_scp = cf.get("file","file_id_scp")
+test_id_scp = cf.get("file","test_id_scp")
+question_file_name = cf.get("file","question_file_name")
 
-#
-file_id_scp = os.path.join("./data", 'file_id_list.scp')
-test_id_scp = os.path.join("./data", 'test_id_scp.scp')
-#
-inp_dim = 425
-out_dim = 187
-inp_norm = "MINMAX"
-out_norm = "MINMAX"

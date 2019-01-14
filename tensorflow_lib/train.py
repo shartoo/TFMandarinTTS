@@ -58,7 +58,7 @@ class TrainTensorflowModels(TensorflowModels):
     def train_feedforward_model(self, train_x, train_y, batch_size=256, num_of_epochs=10, shuffle_data=True):
         seed=12345
         np.random.seed(seed)
-        print train_x.shape
+        print(train_x.shape)
         with self.graph.as_default() as g:
            output_data=tf.placeholder(dtype=tf.float32,shape=(None,self.n_out),name="output_data")
            input_layer=g.get_collection(name="input_layer")[0]
@@ -74,7 +74,7 @@ class TrainTensorflowModels(TensorflowModels):
            self.saver=tf.train.Saver()
            with tf.Session() as sess:
              init.run();summary_writer=tf.summary.FileWriter(os.path.join(self.ckpt_dir,"losslog"),sess.graph)
-             for epoch in xrange(num_of_epochs):
+             for epoch in range(num_of_epochs):
                  L=1;overall_loss=0
                  for iteration in range(int(train_x.shape[0]/batch_size)+1):
                     if (iteration+1)*batch_size>train_x.shape[0]:
@@ -96,9 +96,9 @@ class TrainTensorflowModels(TensorflowModels):
             #        training_loss=loss.eval(feed_dict={input_layer:train_x,output_data:train_y,is_training_drop:False,is_training_batch:False})
             #     else:
             #        training_loss=loss.eval(feed_dict={input_layer:train_x,output_data:train_y,is_training_batch:False})
-                 print "Epoch ",epoch+1, "Finishes","Training loss:",overall_loss/L
+                 print("Epoch ",epoch+1, "Finishes","Training loss:",overall_loss/L)
              self.saver.save(sess,os.path.join(self.ckpt_dir,"mymodel.ckpt"))
-             print "The model parameters are saved"
+             print("The model parameters are saved")
 
     def get_batch(self,train_x,train_y,start,batch_size=50):
         utt_keys=train_x.keys()
@@ -143,7 +143,7 @@ class TrainTensorflowModels(TensorflowModels):
             #overall_loss=tf.summary.scalar("training loss",overall_loss)
             with tf.Session() as sess:
                  init.run();summary_writer=tf.summary.FileWriter(os.path.join(self.ckpt_dir,"losslog"),sess.graph)
-                 for epoch in xrange(num_of_epochs):
+                 for epoch in range(num_of_epochs):
                      L=1;overall_loss=0
                      for iteration in range(int(len(train_x.keys())/batch_size)+1):
                         x_batch,y_batch,utt_length_batch=self.get_batch(train_x,train_y,iteration,batch_size)
@@ -177,10 +177,10 @@ class TrainTensorflowModels(TensorflowModels):
                      #    training_loss=loss.eval(feed_dict={input_layer:temp_train_x,output_data:temp_train_y,utt_length_placeholder:utt_length,is_training_batch:False})
                      #else:
                      #    training_loss=loss.eval(feed_dict={input_layer:temp_train_x,output_data:temp_train_y,utt_length_placeholder:utt_length})
-                     print "Epoch ",epoch+1,"Training loss:",overall_loss/L
+                     print("Epoch ",epoch+1,"Training loss:",overall_loss/L)
                  #model_name="sequence_model"+" hybrid.ckpt" if hybrid==1 else "sequence_model.ckpt"
                  self.saver.save(sess,os.path.join(self.ckpt_dir,"mymodel.ckpt"))
-                 print "The model parameters are saved"
+                 print("The model parameters are saved")
 
     def predict(self, test_x, out_scaler, gen_test_file_list, sequential_training=False, stateful=False):
         #### compute predictions ####
@@ -195,12 +195,12 @@ class TrainTensorflowModels(TensorflowModels):
         print("generating features on held-out test data...")
         with tf.Session() as sess:
            new_saver=tf.train.import_meta_graph(os.path.join(self.ckpt_dir,"mymodel.ckpt.meta"))
-           print "loading the model parameters..."
+           print("loading the model parameters...")
            output_layer=tf.get_collection("output_layer")[0]
            input_layer=tf.get_collection("input_layer")[0]
            new_saver.restore(sess,os.path.join(self.ckpt_dir,"mymodel.ckpt"))
-           print "The model parameters are successfully restored"
-           for utt_index in xrange(test_file_number):
+           print("The model parameters are successfully restored")
+           for utt_index in range(test_file_number):
                gen_test_file_name = gen_test_file_list[utt_index]
                temp_test_x        = test_x[test_id_list[utt_index]]
                num_of_rows        = temp_test_x.shape[0]
@@ -278,7 +278,7 @@ class Train_Encoder_Decoder_Models(Encoder_Decoder_Models):
                overall_loss=0;tf.summary.scalar("training_loss",overall_loss)
                with tf.Session() as sess:
                  init.run();tf.summary_writer=tf.summary.FileWriter(os.path.join(self.ckpt_dir,"losslog"),sess.graph)
-                 for epoch in xrange(num_of_epochs):
+                 for epoch in range(num_of_epochs):
                      L=1
                      for iteration in range(int(temp_train_x.shape[0]/batch_size)+1):
                         x_batch_dict,y_batch_dict,utt_length_batch=self.get_batch(train_x,train_y,iteration,batch_size)
@@ -299,10 +299,10 @@ class Train_Encoder_Decoder_Models(Encoder_Decoder_Models):
                      #    training_loss=loss.eval(feed_dict={inputs_data:temp_train_x,targets:temp_train_y,target_sequence_length:utt_length})
                      #else:
                      #    training_loss=loss.eval(feed_dict={inputs_data:temp_train_x,targets:temp_train_y,inputs_sequence_length:utt_length,target_sequence_length:utt_length})
-                     print "Epoch:",epoch+1, "Training loss:",overall_loss/L
+                     print("Epoch:",epoch+1, "Training loss:",overall_loss/L)
                      summary_writer.add_summary(str(overall_loss),epoch)
                  self.saver.save(sess,os.path.join(self.ckpt_dir,"mymodel.ckpt"))
-                 print "The model parameters are saved"
+                 print("The model parameters are saved")
 
       def predict(self,test_x, out_scaler, gen_test_file_list):
           #### compute predictions ####
@@ -320,11 +320,11 @@ class Train_Encoder_Decoder_Models(Encoder_Decoder_Models):
              """Notice Change decoder_outputs=tf.get_collection("decoder_outputs")[0]"""
              inputs_sequence_length=self.graph.get_collection("inputs_sequence_length")[0]
              target_sequence_length=self.graph.get_collection("target_sequence_length")[0]
-             print "loading the model parameters..."
+             print("loading the model parameters...")
              new_saver.restore(sess,os.path.join(self.ckpt_dir,"mymodel.ckpt"))
-             print "Model parameters are successfully restored"
+             print("Model parameters are successfully restored")
              print("generating features on held-out test data...")
-             for utt_index in xrange(test_file_number):
+             for utt_index in range(test_file_number):
                gen_test_file_name = gen_test_file_list[utt_index]
                temp_test_x        = test_x[test_id_list[utt_index]]
                num_of_rows        = temp_test_x.shape[0]
@@ -335,7 +335,7 @@ class Train_Encoder_Decoder_Models(Encoder_Decoder_Models):
 
                outputs=np.zeros(shape=[len(test_x),max_step,self.n_out],dtype=np.float32)
                 #dec_cell=self.graph.get_collection("decoder_cell")[0]
-               print "Generating speech parameters ..."
+               print("Generating speech parameters ...")
                for t in range(num_of_rows):
                  #  outputs=sess.run(inference_output,{inputs_data:temp_test_x,inputs_sequence_length:utt_length,\
                 #            target_sequence_length:utt_length})
