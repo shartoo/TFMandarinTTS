@@ -236,6 +236,33 @@ def get_x_y(train_id_list,inp_feat_dir,out_feat_dir):
 
     return train_x,train_y
 
+def get_batch(train_x,train_y,start,batch_size=50):
+    utt_keys=train_x.keys()
+    if (start+1)*batch_size>len(utt_keys):
+        batch_keys=utt_keys[start*batch_size:]
+    else:
+       batch_keys=utt_keys[start*batch_size:(start+1)*batch_size]
+    batch_x_dict=dict([(k,train_x[k]) for k  in batch_keys])
+    batch_y_dict=dict([(k,train_y[k]) for k in batch_keys])
+    utt_len_batch=[len(batch_x_dict[k])for k in batch_x_dict.keys()]
+    return batch_x_dict, batch_y_dict, utt_len_batch
 
+
+def normlize_data(inp_train_file_list, out_train_file_list):
+    ### normalize train data ###
+    if os.path.isfile(config.inp_stats_file) and os.path.isfile(config.out_stats_file):
+        inp_scaler = data_utils.load_norm_stats(config.inp_stats_file, config.inp_dim, method=config.inp_norm)
+        out_scaler = data_utils.load_norm_stats(config.out_stats_file, config.out_dim, method=config.out_norm)
+    else:
+        print('preparing train_x, train_y from input and output feature files...')
+        train_x, train_y, train_flen = data_utils.read_data_from_file_list(inp_train_file_list, out_train_file_list,
+            config.inp_dim, config.out_dim, sequential_training=False)
+
+        print('computing norm stats for train_x...')
+        inp_scaler = data_utils.compute_norm_stats(train_x, config.inp_stats_file, method=config.inp_norm)
+
+        print('computing norm stats for train_y...')
+        out_scaler = data_utils.compute_norm_stats(train_y, config.out_stats_file, method=config.out_norm)
+    return inp_scaler,out_scaler
 
 
