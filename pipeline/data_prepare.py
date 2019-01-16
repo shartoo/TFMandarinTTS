@@ -1,19 +1,20 @@
-from utils.utils import read_file_list, prepare_file_path_list
 from tensorflow_lib import hparams
-from utils.utils import read_file_list, prepare_file_path_list
-from acoustic_tools.label_normalisation import HTSLabelNormalisation
-from acoustic_tools.silence_remover import SilenceRemover
-from acoustic_tools.merge_features import MergeFeat
-from acoustic_tools.min_max_norm import MinMaxNormalisation
-from acoustic_tools.acoustic_composition import AcousticComposition
-from constant import waveform,vocoder_output_dim
-from tensorflow_lib import data_utils
+import multiprocessing
+import os
+
+import numpy as np
+from fronted.acoustic.acoustic_composition import AcousticComposition
+from fronted.acoustic.label_normalisation import HTSLabelNormalisation
+from fronted.acoustic.min_max_norm import MinMaxNormalisation
+from fronted.acoustic.silence_remover import SilenceRemover
 
 import config
-import os
-import multiprocessing
-import numpy as np
+from constant import vocoder_output_dim
+from fronted.acoustic.merge_features import MergeFeat
+from tensorflow_lib import data_utils
+from tensorflow_lib import hparams
 from utils import logger
+from utils.utils import read_file_list, prepare_file_path_list
 
 log = logger._set_logger("data_prepare")
 
@@ -58,11 +59,11 @@ def data():
 
     data_dir = hparams.data_dir
 
-    inter_data_dir = hparams.inter_data_dir
-    nn_cmp_dir = hparams.nn_cmp_dir
-    nn_cmp_norm_dir = hparams.nn_cmp_norm_dir
-    model_dir = hparams.model_dir
-    gen_dir = hparams.gen_dir
+    # inter_data_dir = hparams.inter_data_dir
+    # nn_cmp_dir = hparams.nn_cmp_dir
+    # nn_cmp_norm_dir = hparams.nn_cmp_norm_dir
+    # model_dir = hparams.model_dir
+    # gen_dir = hparams.gen_dir
     in_file_list_dict = {}
     for feature_name in list(hparams.in_dir_dict.keys()):
         in_file_list_dict[feature_name] = prepare_file_path_list(file_id_list, hparams.in_dir_dict[feature_name], hparams.file_extension_dict[feature_name], False)
@@ -71,7 +72,7 @@ def data():
     nn_cmp_norm_file_list    = file_paths.get_nn_cmp_norm_file_list()
 
     ###normalisation information
-    norm_info_file = file_paths.norm_info_file
+    norm_info_file = config.norm_info_file
 
     label_normaliser = HTSLabelNormalisation(question_file_name=config.question_file_name,
                                              add_frame_features=config.add_frame_features,
@@ -82,6 +83,7 @@ def data():
     log.info('Input label dimension is %d' % lab_dim)
     suffix = str(lab_dim)
 
+    out_feat_dir = config.out_feat_dir + suffix
     in_label_align_dir = config.in_label_align_dir
     binary_label_dir = config.binary_label_dir
     nn_label_dir = config.nn_label_dir+suffix
@@ -91,7 +93,7 @@ def data():
     binary_label_file_list = [os.path.join(binary_label_dir,file_id) for file_id in os.listdir(binary_label_dir) if file_id.endswith(".lab")]
     nn_label_file_list = [os.path.join(nn_label_norm_dir,file_id) for file_id in os.listdir(nn_label_norm_dir) if file_id.endswith(".lab")]
     nn_label_norm_file_list = [os.path.join(nn_label_dir,file_id) for file_id in os.listdir(nn_label_dir) if file_id.endswith(".lab")]
-
+    dur_file_list = [os.path.join(config.in_dur_dir,x) for x in os.listdir(config.in_dur_dir)]
     train_file_number = int(len(in_label_align_file_list)*0.7)
     min_max_normaliser = None
 
@@ -100,11 +102,11 @@ def data():
 
     # data normalization
 
-    logger.info('preparing label data (input) using standard HTS style labels')
+    log.info('preparing label data (input) using standard HTS style labels')
     label_normaliser.perform_normalisation(in_label_align_file_list, binary_label_file_list, label_type=config.label_type)
 
     if config.additional_features:
-        out_feat_file_list = file_paths.out_feat_file_list
+        out_feat_file_list = [os.path.join(out_feat_dir,x) for x in os.listdir(out_feat_dir)]
         in_dim = label_normaliser.dimension
 
         for new_feature, new_feature_dim in config.additional_features.items():
@@ -129,10 +131,10 @@ def data():
     label_norm_info = np.concatenate((label_min_vector, label_max_vector), axis=0)
 
     label_norm_info = np.array(label_norm_info, 'float32')
-    fid = open(label_norm_file, 'wb')
+    fid = open(config.label_norm_file, 'wb')
     label_norm_info.tofile(fid)
     fid.close()
-    logger.info('saved %s vectors to %s' % (label_min_vector.size, label_norm_file))
+    log.info('saved %s vectors to %s' % (label_min_vector.size, config.label_norm_file))
     ## make output of duration data
     label_normaliser.prepare_dur_data(in_label_align_file_list, dur_file_list, config.label_type,
                                       "numerical")
@@ -159,7 +161,7 @@ def data():
     var_file_dict = file_paths.get_var_dic()
 
     ### normalise output acoustic data
-    logger.info('normalising acoustic (output) features using method %s' % cfg.output_feature_normalisation)
+    log.info('normalising acoustic (output) features using method %s' % cfg.output_feature_normalisation)
     cmp_norm_info = None
     # output_feature_normalisation == 'MINMAX':
     min_max_normaliser = MinMaxNormalisation(feature_dimension=vocoder_output_dim.cmp_dim, min_value=0.01, max_value=0.99)
@@ -170,11 +172,11 @@ def data():
     cmp_max_vector = min_max_normaliser.max_vector
     cmp_norm_info = np.concatenate((cmp_min_vector, cmp_max_vector), axis=0)
     # not cfg.GenTestList
-    cmp_norm_info = numpy.array(cmp_norm_info, 'float32')
+    cmp_norm_info = np.array(cmp_norm_info, 'float32')
     fid = open(norm_info_file, 'wb')
     cmp_norm_info.tofile(fid)
     fid.close()
-    logger.info('saved %s vectors to %s' % (cfg.output_feature_normalisation, norm_info_file))
+    log.info('saved %s vectors to %s' % (config.output_feature_normalisation, norm_info_file))
     feature_index = 0
     for feature_name in list(cfg.out_dimension_dict.keys()):
         feature_std_vector = np.array(
@@ -183,15 +185,10 @@ def data():
         feature_var_vector = feature_std_vector ** 2
         feature_var_vector.tofile(fid)
         fid.close()
-        logger.info('saved %s variance vector to %s' % (feature_name, var_file_dict[feature_name]))
+        log.info('saved %s variance vector to %s' % (feature_name, var_file_dict[feature_name]))
 
         feature_index += cfg.out_dimension_dict[feature_name]
     #
-
-    train_x_file_list, train_y_file_list = file_paths.get_train_list_x_y()
-    valid_x_file_list, valid_y_file_list = file_paths.get_valid_list_x_y()
-    test_x_file_list, test_y_file_list = file_paths.get_test_list_x_y()
-
     # we need to know the label dimension before training the DNN
     # computing that requires us to look at the labels
     #
@@ -208,12 +205,6 @@ def data():
         combined_model_arch += '_' + str(hid_size)
 
     nnets_file_name = config.tf_model_dir
-    temp_dir_name = file_paths.get_temp_nn_dir_name()
-    gen_dir = os.path.join(gen_dir, temp_dir_name)
-
-    ## train model
-    tf_instance = TensorflowClass()
-    tf_instance.train_tensorflow_model()
 
 
 def get_x_y(train_id_list,inp_feat_dir,out_feat_dir):

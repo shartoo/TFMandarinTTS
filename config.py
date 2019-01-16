@@ -1,5 +1,6 @@
 import os
 import configparser
+from constant import vocoder_output_dim
 
 cf = configparser.ConfigParser()
 pwd = os.getcwd()
@@ -10,21 +11,29 @@ inp_dim = 425
 out_dim = 187
 inp_norm = "MINMAX"
 out_norm = "MINMAX"
+output_features = ['mgc','lf0', 'vuv', 'bap']
+gen_wav_features = ['mgc', 'bap', 'lf0']
+
+out_dimension_dict = {}
+
+for feat_name in output_features:
+    if out_dimension > 0:
+        out_dimension_dict[feature_name] = out_dimension
+        cmp_dim += out_dimension
 
 ### acoustic feature define
 inter_data_dir = cf.get("acoustic","inter_data_dir")
 dimension = cf.getint("acoustic","dimension")
 lab_dim = cf.getint("acoustic","lab_dim")
 label_style = cf.get("acoustic","label_style")
-
+in_dur_dir = ""
 binary_label_dir = os.path.join(inter_data_dir,'binary_label_' + str(dimension))
 nn_label_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_')
+out_feat_dir = os.path.join(inter_data_dir, 'binary_label_')
+
 nn_label_norm_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_norm_')
 label_norm_file = 'label_norm_%s_%d.dat' % (label_style, lab_dim)
 label_norm_file = os.path.join(inter_data_dir, label_norm_file)
-
-output_features = ['mgc','lf0', 'vuv', 'bap']
-gen_wav_features = ['mgc', 'bap', 'lf0']
 
 ## global directory
 inter_data_dir = os.path.join("./data/path","inter_data")
@@ -33,9 +42,21 @@ def_out_dir = os.path.join("./data/path","out_feat")
 model_dir = os.path.join("./data/path","models")
 tf_model_dir =os.path.join("./data/path","models","tensorflow")
 
+
+output_feature_normalisation = "MVN"
+_NORM_INFO_FILE_NAME = 'norm_info_%s_%d_%s.dat'
+combined_feature_name = ''
+for feature_name in output_features:
+    combined_feature_name += '_'
+    combined_feature_name += feature_name
+
+norm_info_file = os.path.join(inter_data_dir,_NORM_INFO_FILE_NAME %(combined_feature_name, vocoder_output_dim.cmp_dim,output_feature_normalisation))
+
+nn_cmp_dir = os.path.join(inter_data_dir,'nn' + combined_feature_name + '_' + str(vocoder_output_dim.cmp_dim))
+
 stats_dir = os.path.join("./data/path","stats")
-inp_stats_file = os.path.join(stats_dir, "input_%d_%s_%d.norm" %(inp_norm, inp_dim))
-out_stats_file = os.path.join(stats_dir, "output_%d_%s_%d.norm" %(out_norm, out_dim))
+inp_stats_file = os.path.join(stats_dir, "input_%s_%d.norm" %(inp_norm, inp_dim))
+out_stats_file = os.path.join(stats_dir, "output_%s_%d.norm" %(out_norm, out_dim))
 
 gen_dir = os.path.join("./data/path","gen")
 pred_feat_dir = os.path.join("./data/path","pred_feat")
