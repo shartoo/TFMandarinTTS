@@ -43,11 +43,11 @@ def feedforward_model():
                     last_layer = layer_list[-1]
                     if hparams.hidden_layer_type[i] == "tanh":
                         new_layer = fully_connected(last_layer, hparams.hidden_layer_size[i], activation_fn=tf.nn.tanh,
-                                                    normalizer_fn=batch_norm, \
+                                                    normalizer_fn=batch_norm,
                                                     normalizer_params=bn_params)
                     if hparams.hidden_layer_type[i] == "sigmoid":
                         new_layer = fully_connected(last_layer, hparams.hidden_layer_size[i], activation_fn=tf.nn.sigmoid,
-                                                    normalizer_fn=batch_norm, \
+                                                    normalizer_fn=batch_norm,
                                                     normalizer_params=bn_params)
                     new_layer_drop = dropout(new_layer, hparams.dropout_rate, is_training=is_training_drop)
                     layer_list.append(new_layer_drop)
@@ -55,11 +55,11 @@ def feedforward_model():
                     last_layer = layer_list[-1]
                     if config.hidden_layer_type[i] == "tanh":
                         new_layer = fully_connected(last_layer, hparams.hidden_layer_size[i], activation_fn=tf.nn.tanh,
-                                                    normalizer_fn=batch_norm, \
+                                                    normalizer_fn=batch_norm,
                                                     normalizer_params=bn_params)
                     if hparams.hidden_layer_type[i] == "sigmoid":
                         new_layer = fully_connected(last_layer, hparams.hidden_layer_size[i], activation_fn=tf.nn.sigmoid,
-                                                    normalizer_fn=batch_norm, \
+                                                    normalizer_fn=batch_norm,
                                                     normalizer_params=bn_params)
                     layer_list.append(new_layer)
         with tf.name_scope("output_layer"):
