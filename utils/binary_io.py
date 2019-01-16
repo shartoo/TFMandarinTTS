@@ -37,60 +37,36 @@
 #  THIS SOFTWARE.
 ################################################################################
 
-#/usr/bin/python3 -u
-
-'''
-This script assumes c-version STRAIGHT which is not available to public. Please use your
-own vocoder to replace this script.
-'''
-import sys, os
-import logging
 
 
-def feat_extraction_magphase(in_wav_dir, file_id_list, cfg, logger, b_multiproc=False):
-    sys.path.append(cfg.magphase_bindir)
-    from acoustic_tools.magphase import libutils as lu
-    from acoustic_tools import magphase as mp
+import numpy
 
-    def feat_extraction_magphase_one_file(in_wav_dir, file_name_token, acous_feats_dir, cfg, logger):
+class   BinaryIOCollection(object):
 
-        # Logging:
-        logger.info('Analysing waveform: %s.wav' % (file_name_token))
+    def load_binary_file(self, file_name, dimension):
+        fid_lab = open(file_name, 'rb')
+        features = numpy.fromfile(fid_lab, dtype=numpy.float32)
+        fid_lab.close()
+        assert features.size % float(dimension) == 0.0,'specified dimension %s not compatible with data'%(dimension)
+        features = features[:(dimension * (features.size // dimension))]
+        features = features.reshape((-1, dimension))
 
-        # File setup:
-        wav_file = os.path.join(in_wav_dir, file_name_token + '.wav')
+        return  features
 
-        # Feat extraction:
-        mp.analysis_for_acoustic_modelling(wav_file, out_dir=acous_feats_dir, mag_dim=cfg.mag_dim,
-                                                            phase_dim=cfg.real_dim, b_const_rate=cfg.magphase_const_rate)
+    def array_to_binary_file(self, data, output_file_name):
+        data = numpy.array(data, 'float32')
 
-        return
+        fid = open(output_file_name, 'wb')
+        data.tofile(fid)
+        fid.close()
 
+    def load_binary_file_frame(self, file_name, dimension):
+        fid_lab = open(file_name, 'rb')
+        features = numpy.fromfile(fid_lab, dtype=numpy.float32)
+        fid_lab.close()
+        assert features.size % float(dimension) == 0.0,'specified dimension %s not compatible with data'%(dimension)
+        frame_number = features.size // dimension
+        features = features[:(dimension * frame_number)]
+        features = features.reshape((-1, dimension))
 
-    if b_multiproc:
-        lu.run_multithreaded(feat_extraction_magphase_one_file, in_wav_dir, file_id_list, cfg.acous_feats_dir, cfg, logger)
-    else:
-        for file_name_token in file_id_list:
-            feat_extraction_magphase_one_file(in_wav_dir, file_name_token, cfg.acous_feats_dir, cfg, logger)
-
-
-    return
-
-
-def acous_feat_extraction(in_wav_dir, file_id_list, cfg):
-
-    logger = logging.getLogger("acous_feat_extraction")
-
-    ## MagPhase Vocoder:
-    if cfg.vocoder_type=='MAGPHASE':
-        feat_extraction_magphase(in_wav_dir, file_id_list, cfg, logger)
-
-
-    # TODO: Add WORLD and STRAIGHT
-
-    # If vocoder is not supported:
-    else:
-        logger.critical('The vocoder %s is not supported for feature extraction yet!\n' % cfg.vocoder_type )
-        raise
-
-    return
+        return  features, frame_number

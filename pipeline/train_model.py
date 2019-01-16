@@ -8,9 +8,15 @@ import tensorflow as tf
 import numpy as np
 import os
 
-logger = logger._set_logger("train_model")
+log = logger._set_logger("train_model")
+lab_dir = "../data/"
+cmp_dir = "../data/"
+in_file_list = [os.path.join(lab_dir,x) for x in os.listdir(lab_dir)]
+out_file_list = [os.path.join(cmp_dir,x) for x in os.listdir(cmp_dir)]
 
-inp_train_file_list, out_train_file_list =[] ,[]
+inp_train_file_list =in_file_list[0:int(len(in_file_list)*hparams.train_percent)]
+out_train_file_list = out_file_list[0:int(len(out_file_list)*hparams.train_percent)]
+
 inp_scaler,out_scaler = data_prepare.normlize_data(inp_train_file_list, out_train_file_list)
 train_x, train_y, train_flen = data_utils.read_data_from_file_list(inp_train_file_list, out_train_file_list,
                                                                    config.inp_dim, config.out_dim,
@@ -29,7 +35,7 @@ def feedforward_model():
         with tf.name_scope("input"):
             input_layer = tf.placeholder(dtype=tf.float32, shape=(None, config.inp_dim), name="input_layer")
             if hparams.dropout_rate != 0.0:
-                print("Using dropout to avoid overfitting and the dropout rate is", hparams.dropout_rate)
+                log.info("Using dropout to avoid overfitting and the dropout rate is", hparams.dropout_rate)
                 is_training_drop = tf.placeholder(dtype=tf.bool, shape=(), name="is_training_drop")
                 input_layer_drop = dropout(input_layer, hparams.dropout_rate, is_training=is_training_drop)
                 layer_list.append(input_layer_drop)
@@ -53,7 +59,7 @@ def feedforward_model():
                     layer_list.append(new_layer_drop)
                 else:
                     last_layer = layer_list[-1]
-                    if config.hidden_layer_type[i] == "tanh":
+                    if hparams.hidden_layer_type[i] == "tanh":
                         new_layer = fully_connected(last_layer, hparams.hidden_layer_size[i], activation_fn=tf.nn.tanh,
                                                     normalizer_fn=batch_norm,
                                                     normalizer_params=bn_params)
@@ -92,7 +98,7 @@ def train_feedforward_model(ckpt_dir,train_x, train_y, batch_size=256, num_of_ep
            init=tf.global_variables_initializer()
            saver=tf.train.Saver()
            with tf.Session() as sess:
-             init.run();
+             init.run()
              summary_writer=tf.summary.FileWriter(os.path.join(ckpt_dir,"losslog"),sess.graph)
              for epoch in range(num_of_epochs):
                  L=1;overall_loss=0
@@ -110,7 +116,7 @@ def train_feedforward_model(ckpt_dir,train_x, train_y, batch_size=256, num_of_ep
                     else:
                        _,batch_loss=sess.run([training_op,loss],feed_dict={input_layer:x_batch,output_data:y_batch,is_training_batch:True})
                     overall_loss+=batch_loss
-                 print("Epoch ",epoch+1, "Finishes","Training loss:",overall_loss/L)
+                 log.info("Epoch ",epoch+1, "Finishes","Training loss:",overall_loss/L)
              saver.save(sess,os.path.join(ckpt_dir,"mandarin_tts.ckpt"))
              print("The model parameters are saved")
 

@@ -43,8 +43,7 @@ import random
 import numpy as np
 
 from sklearn import preprocessing
-
-from io_funcs.binary_io import BinaryIOCollection
+from utils.binary_io import BinaryIOCollection
 
 ############################
 ##### Memory variables #####

@@ -39,7 +39,7 @@
 
 
 import sys, numpy
-from io_funcs.binary_io import BinaryIOCollection
+from utils.binary_io import BinaryIOCollection
 import  logging
 from scipy.stats.stats import pearsonr
 

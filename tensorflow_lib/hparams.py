@@ -8,12 +8,12 @@ model_file_name = ""
 
 inp_dim = 425
 out_dim = 187
-
+train_percent,valid_percent,test_percent = 0.7,0.2,0.1
 inp_norm = "MINMAX"
 out_norm ="MINMAX"
 
-inp_stats_file = os.path.join(stats_dir, "input_%d_%s_%d.norm" %(int(train_file_number), inp_norm, inp_dim))
-out_stats_file = os.path.join(stats_dir, "output_%d_%s_%d.norm" %(int(train_file_number), out_norm, out_dim))
+inp_stats_file = os.path.join(stats_dir, "input_%s_%d.norm" %(inp_norm, inp_dim))
+out_stats_file = os.path.join(stats_dir, "output_%s_%d.norm" %(out_norm, out_dim))
 
 inp_scaler =  data_utils.load_norm_stats(inp_stats_file, inp_dim, method=inp_norm)
 out_scaler = data_utils.load_norm_stats(out_stats_file, out_dim, method=out_norm)
@@ -46,7 +46,7 @@ output_layer_type = 'LINEAR'
 loss_function = 'mse'
 optimizer ='sgd'
 
-dropout_rate = 0.0
+dropout_rate = 0.2
 num_of_epochs = 1
 
 json_model_file =os.path.join(model_dir, model_file_name+'.json')
