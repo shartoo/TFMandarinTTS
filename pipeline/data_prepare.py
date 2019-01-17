@@ -244,3 +244,5 @@ def normlize_data(inp_train_file_list, out_train_file_list):
     return inp_scaler,out_scaler
 
 
+
+data()
