@@ -17,7 +17,7 @@ from tensorflow_lib import hparams
 from utils import logger
 from utils.utils import read_file_list, prepare_file_path_list
 
-log = logger._set_logger("data_prepare")
+log = logger.get_logger("data_prepare","../data/log/data_prepare.log")
 
 def perform_acoustic_composition_on_split(args):
     """ Performs acoustic composition on one chunk of data.
@@ -56,8 +56,8 @@ def perform_acoustic_composition(delta_win, acc_win, in_file_list_dict, nn_cmp_f
 
 
 def data():
-    file_id_list = read_file_list(hparams.file_id_scp)
-    data_dir = hparams.data_dir
+    #file_id_list = read_file_list(hparams.file_id_scp)
+    #data_dir = hparams.data_dir
 
     in_file_list_dict = {}
     for feature_name in list(config.in_dir_dict.keys()):
@@ -69,7 +69,8 @@ def data():
     label_normaliser = HTSLabelNormalisation(question_file_name=config.question_file_name,
                                              add_frame_features=config.add_frame_features,
                                              subphone_feats=config.subphone_feats)
-    add_feat_dim = sum(config.additional_features.values())
+    #add_feat_dim = sum(config.additional_features.values())
+    add_feat_dim = 0
     appended_input_dim = 0
     lab_dim = label_normaliser.dimension + add_feat_dim + appended_input_dim
     log.info('Input label dimension is %d' % lab_dim)

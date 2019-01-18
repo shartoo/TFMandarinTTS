@@ -14,10 +14,6 @@ out_norm ="MINMAX"
 
 inp_stats_file = os.path.join(stats_dir, "input_%s_%d.norm" %(inp_norm, inp_dim))
 out_stats_file = os.path.join(stats_dir, "output_%s_%d.norm" %(out_norm, out_dim))
-
-inp_scaler =  data_utils.load_norm_stats(inp_stats_file, inp_dim, method=inp_norm)
-out_scaler = data_utils.load_norm_stats(out_stats_file, out_dim, method=out_norm)
-
 hidden_layer_type = ['TANH', 'TANH', 'TANH', 'TANH', 'TANH', 'TANH']
 hidden_layer_size =[1024, 1024, 1024, 1024, 1024, 1024]
 

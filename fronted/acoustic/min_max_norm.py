@@ -39,7 +39,7 @@
 
 
 import numpy
-from io_funcs.binary_io import BinaryIOCollection
+from utils.binary_io import BinaryIOCollection
 import logging
 
 class MinMaxNormalisation(object):

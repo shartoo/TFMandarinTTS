@@ -37,7 +37,7 @@
 #  THIS SOFTWARE.
 ################################################################################
 
-from io_funcs.binary_io import BinaryIOCollection
+from utils.binary_io import BinaryIOCollection
 import numpy
 import logging
 from .acoustic_base import AcousticBase

@@ -3,11 +3,13 @@ import configparser
 from constant import vocoder_output_dim,waveform
 from utils import logger
 
-log = logger.get_logger("config_log")
+print(os.listdir("../data"))
+log = logger.get_logger("config_log","../data/log/mandarin_tts.log")
 
 cf = configparser.ConfigParser()
 pwd = os.getcwd()
-cf.read(os.path.join(pwd,'./resource/cfgs','cfg.config'))
+print(os.listdir("../resources/mandarin"))
+cf.read(os.path.join(pwd,'../resources/cfgs','cfg.config'))
 #
 add_frame_features = ""
 inp_dim = 425
@@ -17,25 +19,31 @@ out_norm = "MINMAX"
 output_features = ['mgc','lf0', 'vuv', 'bap']
 gen_wav_features = ['mgc', 'bap', 'lf0']
 
-
+print(cf.sections())
 ### acoustic feature define
 inter_data_dir = cf.get("acoustic","inter_data_dir")
 dimension = cf.getint("acoustic","dimension")
-lab_dim = cf.getint("acoustic","lab_dim")
 label_style = cf.get("acoustic","label_style")
+## feature directory
+acoustic_feat_dir = cf.get("acoustic","acoustic_data_dir")
+in_stepw_dir = os.path.join(acoustic_feat_dir,"stepw")
+in_mgc_dir = os.path.join(acoustic_feat_dir,"mgc")
+in_lf0_dir = os.path.join(acoustic_feat_dir,"lf0")
+in_bap_dir = os.path.join(acoustic_feat_dir,"bap")
+in_sp_dir = os.path.join(acoustic_feat_dir,"sp")
+in_seglf0_dir = os.path.join(acoustic_feat_dir,"lf0")
+in_acous_feats_dir = os.path.join("./data","in_acoustic_feats")
+
 in_dur_dir = ""
 binary_label_dir = os.path.join(inter_data_dir,'binary_label_' + str(dimension))
 nn_label_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_')
 out_feat_dir = os.path.join(inter_data_dir, 'binary_label_')
 
 nn_label_norm_dir = os.path.join(inter_data_dir,'nn_no_silence_lab_norm_')
-label_norm_file = 'label_norm_%s_%d.dat' % (label_style, lab_dim)
+label_norm_file = 'label_norm_%s.dat' % (label_style)
 label_norm_file = os.path.join(inter_data_dir, label_norm_file)
 
 ## global directory
-inter_data_dir = os.path.join("./data/path","inter_data")
-def_inp_dir = os.path.join("./data/path","inp_feat")
-def_out_dir = os.path.join("./data/path","out_feat")
 model_dir = os.path.join("./data/path","models")
 tf_model_dir =os.path.join("./data/path","models","tensorflow")
 
@@ -49,14 +57,8 @@ combined_feature_name = ''
 for feature_name in output_features:
     combined_feature_name += '_'
     combined_feature_name += feature_name
-
-
-stats_dir = os.path.join("./data/path","stats")
-inp_stats_file = os.path.join(stats_dir, "input_%s_%d.norm" %(inp_norm, inp_dim))
-out_stats_file = os.path.join(stats_dir, "output_%s_%d.norm" %(out_norm, out_dim))
-
-gen_dir = os.path.join("./data/path","gen")
-pred_feat_dir = os.path.join("./data/path","pred_feat")
+inp_stats_file = os.path.join(inter_data_dir, "input_%s_%d.norm" %(inp_norm, inp_dim))
+out_stats_file = os.path.join(inter_data_dir, "output_%s_%d.norm" %(out_norm, out_dim))
 
 ## glottHMM
 glott_hmm_path = cf.get("paths","glott_hmm")
@@ -87,14 +89,7 @@ file_id_scp = cf.get("file","file_id_scp")
 test_id_scp = cf.get("file","test_id_scp")
 question_file_name = cf.get("file","question_file_name")
 #
-## feature directory
-in_stepw_dir = os.path.join("./data/acoustic_features","stepw")
-in_mgc_dir = os.path.join("./data/acoustic_features","mgc")
-in_lf0_dir = os.path.join("./data/acoustic_features","lf0")
-in_bap_dir = os.path.join("./data/acoustic_features","bap")
-in_sp_dir = os.path.join("./data/acoustic_features","sp")
-in_seglf0_dir = os.path.join("./data/acoustic_features","lf03")
-in_acous_feats_dir = os.path.join("./data","in_acoustic_feats")
+
 
 in_dimension_dict = {}
 out_dimension_dict = {}
@@ -212,7 +207,6 @@ for feature_name in output_features:
         in_directory  = in_dur_dir
     else:
         log.critical('%s feature is not supported right now. Please change the configuration.py to support it' %(feature_name))
-        raise
     log.info('  in_dimension: %d' % in_dimension)
     log.info('  out_dimension : %d' % out_dimension)
     log.info('  in_directory : %s' %  in_directory)
@@ -230,8 +224,8 @@ for feature_name in output_features:
         cmp_dim += out_dimension
 
 norm_info_file = os.path.join(inter_data_dir,_NORM_INFO_FILE_NAME %(combined_feature_name, vocoder_output_dim.cmp_dim,output_feature_normalisation))
-nn_cmp_dir = os.path.join(inter_data_dir,'nn' + combined_feature_name + '_' + str(vocoder_output_dim.cmp_dim))
-nn_cmp_norm_dir = os.path.join(inter_data_dir, 'nn_norm' + combined_feature_name + '_' +str(cmp_dim))
+nn_cmp_dir = os.path.join(inter_data_dir,'nn' + combined_feature_name + '_' + str(out_dim))
+nn_cmp_norm_dir = os.path.join(inter_data_dir, 'nn_norm' + combined_feature_name + '_' +str(out_dim))
 var_file_dict = {}
 for feature_name in list(out_dimension_dict.keys()):
     var_file_dict[feature_name] = os.path.join(var_dir,feature_name + '_' + str(out_dimension_dict[feature_name]))

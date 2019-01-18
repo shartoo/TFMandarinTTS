@@ -4,8 +4,7 @@ import logging
 import os
 
 def get_logger(log_name,log_save_file="mandarin_tts.log"):
-    log_save_file = os.path.join("../data/log",log_save_file)
-    if not (os.path.exists(log_save_file)):  # 检查文件是否已经存在
+    if not (os.path.exists(log_save_file)):
         fo = open(log_save_file, "w")
         fo.close()
     fsize = os.path.getsize(log_save_file)

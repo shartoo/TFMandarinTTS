@@ -2,7 +2,7 @@
 import os
 import numpy, re, sys
 from multiprocessing import Pool
-from io_funcs.binary_io import BinaryIOCollection
+from utils.binary_io import BinaryIOCollection
 from .linguistic_base import LinguisticBase
 
 import matplotlib.mlab as mlab
