@@ -1,6 +1,6 @@
 # TFMandarinTTS
 
-A demo version of merlin with mandarin fronted to make a simple tte system.
+A demo version of merlin with mandarin fronted to make a simple tts system.
 
 + Merlin is too complicated for TTS noob like me, thus i want to write a simple but clear system merlin just for mandarin .
 
